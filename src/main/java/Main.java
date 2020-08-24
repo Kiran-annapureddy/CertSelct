@@ -1,9 +1,11 @@
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.PointerType;
 import com.sun.jna.platform.DesktopWindow;
 import com.sun.jna.platform.WindowUtils;
 import com.sun.jna.platform.win32.Crypt32;
+import com.sun.jna.platform.win32.Cryptui;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinCrypt;
@@ -20,20 +22,25 @@ public class Main {
     public WinCrypt.CERT_CONTEXT selectCertificate() {
 
         Cryptdlg cryptdlg = Cryptdlg.INSTANCE;
-
         Cryptdlg.CERT_SELECT_STRUCT pCertSelectInfo = new Cryptdlg.CERT_SELECT_STRUCT();
+        pCertSelectInfo.dwSize = pCertSelectInfo.size();
         pCertSelectInfo.hwndParent = parentHwnd;
         Memory message1 = new Memory(((SELECT_CERT_PREFIX.length() + 1) * (long) Native.WCHAR_SIZE));
         message1.setWideString(0, SELECT_CERT_PREFIX);
         pCertSelectInfo.szTitle = message1;
         pCertSelectInfo.pfnFilter = new CertCallback();
         pCertSelectInfo.cCertStore = 1;
-        pCertSelectInfo.arrayCertStore = hCertStore.getPointer();
+        pCertSelectInfo.setArrayCertStore(new WinCrypt.HCERTSTORE[]{hCertStore});
         pCertSelectInfo.cCertContext = 1;
-        WinCrypt.CERT_CONTEXT[] pContexts = (WinCrypt.CERT_CONTEXT[]) new WinCrypt.CERT_CONTEXT().toArray(1);
-        pCertSelectInfo.setArrayCertContext(pContexts);
-        boolean suc = cryptdlg.CertSelectCertificate(pCertSelectInfo);
-        return pCertSelectInfo.getArrayCertContext()[0];
+        pCertSelectInfo.arrayCertContext = new Memory(Native.POINTER_SIZE);
+        pCertSelectInfo.arrayCertContext.setPointer(0, Pointer.NULL);
+        boolean result = cryptdlg.CertSelectCertificate(pCertSelectInfo);
+        if(result) {
+            return  pCertSelectInfo.getArrayCertContext()[0];
+        } else {
+            return null;
+        }
+
     }
 
 

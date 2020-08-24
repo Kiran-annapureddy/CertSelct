@@ -52,18 +52,17 @@ public interface Cryptdlg extends StdCallLibrary{
         public WinCrypt.CERT_CONTEXT[] getArrayCertContext() {
             WinCrypt.CERT_CONTEXT[] elements = new WinCrypt.CERT_CONTEXT[cCertContext];
             for (int i = 0; i < elements.length; i++) {
-                elements[i] =
-                        (WinCrypt.CERT_CONTEXT)
-                                Structure.newInstance(
-                                        WinCrypt.CERT_CONTEXT.class,
-                                        arrayCertContext.getPointer(i * Native.POINTER_SIZE));
+                elements[i] =(WinCrypt.CERT_CONTEXT)
+                        Structure.newInstance(
+                                WinCrypt.CERT_CONTEXT.class,
+                                arrayCertContext.getPointer(i * Native.POINTER_SIZE));
                 elements[i].read();
             }
             return elements;
         }
 
         public void setArrayCertContext(WinCrypt.CERT_CONTEXT[] arrayCertContexts) {
-            if (arrayCertContexts == null || arrayCertContexts.length == 0) {
+            if(arrayCertContexts == null || arrayCertContexts.length == 0) {
                 arrayCertContext = null;
                 cCertContext = 0;
             } else {
@@ -103,6 +102,12 @@ public interface Cryptdlg extends StdCallLibrary{
         }
 
         @Override
+        public void write() {
+            this.dwSize = size();
+            super.write();
+        }
+
+        @Override
         protected List<String> getFieldOrder() {
             return fieldOrder;
         }
@@ -119,7 +124,7 @@ public interface Cryptdlg extends StdCallLibrary{
 
     public interface FncmFilterProcCallback extends StdCallLibrary.StdCallCallback {
 
-        public boolean callback(
-                WinCrypt.CERT_CONTEXT pCertContext, String lCustData, int dwFlags, int dwDisplayWell);
+        boolean callback(
+                WinCrypt.CERT_CONTEXT pCertContext, WinDef.LPARAM lCustData, int dwFlags, int dwDisplayWell);
     }
 }
