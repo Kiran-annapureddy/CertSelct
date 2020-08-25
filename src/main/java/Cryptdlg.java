@@ -32,7 +32,7 @@ public interface Cryptdlg extends StdCallLibrary{
         public WinDef.HINSTANCE hInstance;
         public String pTemplateName;
         public int dwFlags;
-        public Pointer szTitle;
+        public String szTitle;
         public int cCertStore;
         public Pointer arrayCertStore;
         public String szPurposeOid;

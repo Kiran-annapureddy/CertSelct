@@ -23,11 +23,8 @@ public class Main {
 
         Cryptdlg cryptdlg = Cryptdlg.INSTANCE;
         Cryptdlg.CERT_SELECT_STRUCT pCertSelectInfo = new Cryptdlg.CERT_SELECT_STRUCT();
-        pCertSelectInfo.dwSize = pCertSelectInfo.size();
         pCertSelectInfo.hwndParent = parentHwnd;
-        Memory message1 = new Memory(((SELECT_CERT_PREFIX.length() + 1) * (long) Native.WCHAR_SIZE));
-        message1.setWideString(0, SELECT_CERT_PREFIX);
-        pCertSelectInfo.szTitle = message1;
+        pCertSelectInfo.szTitle = SELECT_CERT_PREFIX;
         pCertSelectInfo.pfnFilter = new CertCallback();
         pCertSelectInfo.cCertStore = 1;
         pCertSelectInfo.setArrayCertStore(new WinCrypt.HCERTSTORE[]{hCertStore});
