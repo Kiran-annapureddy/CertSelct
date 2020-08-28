@@ -1,11 +1,9 @@
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.PointerType;
 import com.sun.jna.platform.DesktopWindow;
 import com.sun.jna.platform.WindowUtils;
 import com.sun.jna.platform.win32.Crypt32;
-import com.sun.jna.platform.win32.Cryptui;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinCrypt;
@@ -19,7 +17,7 @@ public class Main {
     private WinCrypt.HCERTSTORE hCertStore = null;
     private WinDef.HWND parentHwnd = new WinDef.HWND();
 
-    public WinCrypt.CERT_CONTEXT selectCertificate() {
+    public void selectCertificate(Cryptdlg.PCERT_CONTEXT pcertContext) {
 
         Cryptdlg cryptdlg = Cryptdlg.INSTANCE;
         Cryptdlg.CERT_SELECT_STRUCT pCertSelectInfo = new Cryptdlg.CERT_SELECT_STRUCT();
@@ -33,9 +31,10 @@ public class Main {
         pCertSelectInfo.arrayCertContext.setPointer(0, Pointer.NULL);
         boolean result = cryptdlg.CertSelectCertificate(pCertSelectInfo);
         if(result) {
-            return  pCertSelectInfo.getArrayCertContext()[0];
-        } else {
-            return null;
+            WinCrypt.CERT_CONTEXT context=   pCertSelectInfo.getArrayCertContext()[0];
+
+            // need to assign the the context(WinCrypt.CERT_CONTEXT) to Cryptdlg.PCERT_CONTEXT pcertContext
+            pcertContext.certContext = (WinCrypt.CERT_CONTEXT.ByReference) context;
         }
 
     }
@@ -79,8 +78,8 @@ public class Main {
         return 0;
     }
 
-    public void closeSystemStore(WinCrypt.CERT_CONTEXT pCertContext) throws Exception {
-        Crypt32.INSTANCE.CertFreeCertificateContext(pCertContext);
+    public void closeSystemStore(Cryptdlg.PCERT_CONTEXT pCertContext) throws Exception {
+        Crypt32.INSTANCE.CertFreeCertificateContext(pCertContext.certContext);
 
         if (!CertCloseStore(hCertStore, 0)) {
             System.out.println("Error");
@@ -112,8 +111,9 @@ public class Main {
         Frame f = ob.createWindown();
         ob.setParentHwnd();
         ob.openSystemStore();
-        WinCrypt.CERT_CONTEXT ctx = ob.selectCertificate();
-        ob.closeSystemStore(ctx);
+        Cryptdlg.PCERT_CONTEXT pcertContext = new Cryptdlg.PCERT_CONTEXT();
+        ob.selectCertificate(pcertContext);
+        ob.closeSystemStore(pcertContext);
 
     }
 }

@@ -6,6 +6,7 @@ import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.WinCrypt;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.win32.W32APIOptions;
+import java.util.Arrays;
 import java.util.List;
 
 import com.sun.jna.win32.StdCallLibrary;
@@ -126,5 +127,18 @@ public interface Cryptdlg extends StdCallLibrary{
 
         boolean callback(
                 WinCrypt.CERT_CONTEXT pCertContext, WinDef.LPARAM lCustData, int dwFlags, int dwDisplayWell);
+    }
+
+    public static class PCERT_CONTEXT extends Structure {
+        public static class ByReference extends PCERT_CONTEXT implements Structure.ByReference {}
+
+        public static class ByValue extends PCERT_CONTEXT implements Structure.ByValue {}
+
+        public WinCrypt.CERT_CONTEXT.ByReference certContext;
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return Arrays.asList("certContext");
+        }
     }
 }
